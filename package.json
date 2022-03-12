@@ -1,0 +1,67 @@
+{
+  "name": "JishBotApp",
+  "version": "0.0.1",
+  "description": "An app to use the Jish Discord Bot",
+  "main": "index.js",
+  "author": "Hayden Steele",
+  "license": "MIT",
+  "build": {
+    "files": [
+      "build/*"
+    ]
+  },
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.63",
+    "@electron-forge/maker-deb": "^6.0.0-beta.63",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.63",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.63",
+    "@electron-forge/maker-zip": "^6.0.0-beta.63",
+    "electron": "^17.1.0"
+  },
+  "dependencies": {
+    "electron-builder": "^22.14.13",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^4.6.5",
+    "node-schedule": "^2.1.0"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "icon": "./icons/win/icon.ico"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "JishBotApp"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChickenNuggetsPerson/JishBotApp.git"
+  }
+}

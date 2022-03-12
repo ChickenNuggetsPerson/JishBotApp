@@ -1,0 +1,233 @@
+.loginText {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+}
+
+.loginText h2 {
+    font-size: medium;
+}
+
+.form__group {
+    position: relative;
+    padding: 15px 0 0;
+    margin-top: 10px;
+    width: 50%;
+    
+  }
+  
+  .form__field {
+    font-family: inherit;
+    width: 100%;
+    border: 0;
+    border-bottom: 2px solid #9b9b9b;
+    outline: 0;
+    font-size: 1.3rem;
+    color: #fff;
+    padding: 7px 0;
+    background: transparent;
+    transition: border-color 0.2s;
+  }
+  .form__field::placeholder {
+    color: transparent;
+  }
+  .form__field:placeholder-shown ~ .form__label {
+    font-size: 1.3rem;
+    cursor: text;
+    top: 20px;
+  }
+  
+  .form__label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #9b9b9b;
+  }
+  
+  .form__field:focus {
+    padding-bottom: 6px;
+    font-weight: 700;
+    border-width: 3px;
+    border-image: linear-gradient(to right, #11998e, #38ef7d);
+    border-image-slice: 1;
+  }
+  .form__field:focus ~ .form__label {
+    position: absolute;
+    top: 0;
+    display: block;
+    transition: 0.2s;
+    font-size: 1rem;
+    color: #11998e;
+    font-weight: 700;
+  }
+  
+  /* reset input */
+  .form__field:required, .form__field:invalid {
+    box-shadow: none;
+  }
+  
+  /* demo */
+  body {
+    font-family: "Poppins", sans-serif;
+    
+    background-color: #222222;
+  }
+
+  .btn{
+	color:#fff;
+	background-color:#e74c3c;
+	outline: none;
+    border: 0;
+    color: #fff;
+	padding:10px 20px;
+	text-transform:uppercase;
+	margin-top:50px;
+	border-radius:2px;
+	cursor:pointer;
+	position:relative;
+}
+
+.preAuth h3 {
+    margin: auto;
+    
+}
+
+.preAuth {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 90vh;
+  font-size: 1.5rem;
+}
+
+.postAuth {
+  font-family: Arial, Helvetica, sans-serif;
+  color: white;
+  text-align: center;
+}
+
+.postAuth h4 {
+  font-size: larger;
+}
+
+.postAuth h6 {
+   font-size: medium;
+}
+
+#leftbox {
+  float:left; 
+  width:50%;
+  height: 75vh ;
+}
+
+#rightbox{
+  float:right;
+  width:25%;
+  height:73vh ;
+  margin-right: 15%;
+}
+
+#topbox {
+  border: solid #333333;
+  height: 22vh;
+}
+
+.ytSearch {
+  font-family: inherit;
+  width: 95%;
+  border: 0;
+  border: 2px solid #9b9b9b;
+  outline: 0;
+  font-size: 1.3rem;
+  color: #fff;
+  padding: 7px 0;
+  background: #222222;
+  transition: border-color 0.2s;
+  margin-top: 30px;
+}
+.ytSearch::placeholder {
+  color: #222222;
+}
+.ytSearch:placeholder-shown ~ .form__label {
+  font-size: 1.3rem;
+  cursor: text;
+  top: 20px;
+}
+
+.ytSearch button {
+  margin-top: 5%;
+}
+
+.ytSearch:focus {
+  padding-bottom: 6px;
+  font-weight: 700;
+  border-width: 3px;
+  border-image: linear-gradient(to right, #11998e, #38ef7d);
+  border-image-slice: 1;
+}
+.ytSearch:focus ~ .form__label {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: 0.2s;
+  font-size: 1rem;
+  color: #11998e;
+  font-weight: 700;
+}
+
+.ytSearchBtn {
+  font-family: inherit;
+  width: 95%;
+  border: 0;
+  border: 2px solid #9b9b9b;
+  outline: 0;
+  font-size: 1.3rem;
+  color: #fff;
+  padding: 7px 0;
+  background: #222222;
+  transition: border-color 0.2s;
+  margin-top: 20%;
+}
+
+.ytSearchBtn:hover {
+  color: #11998e;
+}
+
+.ytSearchBtn:active {
+  border-image: linear-gradient(to right, #11998e, #38ef7d);
+  border-image-slice: 1;
+  
+}
+
+.table {
+  /* overflow-y:scroll; */
+  height: 310px;
+  display:block;
+  margin-top: 0px;
+  float: left;
+}
+
+.table tr {
+  border: white;
+}
+
+.dynamictextstuff {
+  font-size: medium;
+}
+
+#notification {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 200px;
+  padding: 20px;
+  border-radius: 5px;
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+.hidden {
+  display: none;
+}
