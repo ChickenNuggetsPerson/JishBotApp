@@ -139,7 +139,7 @@
     color: #fff;
 	padding:10px 20px;
 	text-transform:uppercase;
-	margin-top:63%;
+	margin-top:64%;
   margin-left: 80%;
 	border-radius:2px;
 	cursor:pointer;
@@ -254,7 +254,6 @@
   background: #222222;
   transition: border-color 0.2s;
   margin-top: 30px;
-  border-radius: 0.6pc;
 }
 .ytSearch::placeholder {
   color: #222222;
@@ -275,7 +274,6 @@
   border-width: 3px;
   border-image: linear-gradient(to right, #11998e, #38ef7d);
   border-image-slice: 1;
-  border-radius: 0.6pc;
 }
 .ytSearch:focus ~ .form__label {
   position: absolute;
@@ -285,7 +283,6 @@
   font-size: 1rem;
   color: #11998e;
   font-weight: 700;
-  
 }
 
 .ytSearchBtn {
@@ -300,18 +297,15 @@
   background: #222222;
   transition: border-color 0.2s;
   margin-top: 20%;
-  border-radius: 0.6pc;
 }
 
 .ytSearchBtn:hover {
   color: #11998e;
-  border-radius: 0.6pc;
 }
 
 .ytSearchBtn:active {
   border-image: linear-gradient(to right, #11998e, #38ef7d);
   border-image-slice: 1;
-  border-radius: 0.6pc;
   
 }
 
@@ -358,8 +352,7 @@
   background: #222222;
   transition: border-color 0.2s;
   padding: 10px;
-  border-radius: 0.6pc;
-  margin-bottom: 9px;
+  
 }
 .controlBtn:hover {
   color: #11998e;
@@ -383,4 +376,9 @@
 
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
+}
+
+p {
+  color: black;
+  margin: 0px;
 }

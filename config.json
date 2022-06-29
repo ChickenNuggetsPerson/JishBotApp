@@ -1,0 +1,5 @@
+{
+    "hostname": "musicdiscord.steeleinnovations.com",
+    "port": 9999,
+    "cookieName": "process.env.SESSION_KEY"
+}

@@ -1,163 +1,347 @@
 document.getElementById("postAuth").style.display = "none"
 
+const version = "Version: 0.3.4"
+
+console.log(version)
+document.getElementById('version').innerText = version
+document.getElementById('preAuthVersion').innerText = version
+
+const { hostname, port, cookieName } = require('../config.json')
+
 console.log("Renderer Loaded")
-const http = require('http');
 const https = require('https')
-const fs = require("fs")
 const schedule = require("node-schedule")
 const { ipcRenderer } = require('electron');
+const ElectronTitlebarWindows = require('electron-titlebar-windows');
+let $ = jQuery = require('jquery')
+const fs = require('fs')
 
-const notification = document.getElementById('notification');
-const message = document.getElementById('message');
-const restartButton = document.getElementById('restart-button');
+process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
+
+
+const clientID = randomBetween(0, 999999999999)
+console.log("Client: " + clientID)
+
+function initTitlebar() {
+    console.log("Init Titlebar")
+    const titlebar = new ElectronTitlebarWindows({
+        draggable: true
+    })
+    titlebar.appendTo(document.getElementById("titlebar"))
+    titlebar.on('close', () => {
+        ipcRenderer.send('app:quit')
+    })
+    titlebar.on('minimize', () => {
+        ipcRenderer.send('app:minimize')
+    })
+    
+}
 
 ipcRenderer.on('update_available', () => {
+    console.log("Downloading Update")
     ipcRenderer.removeAllListeners('update_available');
-    message.innerText = 'A new update is available. Downloading now...';
-    notification.classList.remove('hidden');
 });
 
 ipcRenderer.on('update_downloaded', () => {
     ipcRenderer.removeAllListeners('update_downloaded');
-    message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
-    restartButton.classList.remove('hidden');
-    notification.classList.remove('hidden');
+    const NOTIFICATION_TITLE = 'Update Available'
+    const NOTIFICATION_BODY = 'Click this notification to update'
+
+    new Notification(NOTIFICATION_TITLE, { body: NOTIFICATION_BODY }).onclick = () => ipcRenderer.send('restart_app');
 });
 
-function closeNotification() {
-    notification.classList.add('hidden');
-}
-
-function restartApp() {
-    ipcRenderer.send('restart_app');
-}
-
 document.getElementById("authenticateBtn").onclick = async function() {
-    await fetchData();
+   
+    ipcRenderer.send('authenticateBtn', clientID)
+    
+}
+
+function isAuthenticated() {
+     try {
+        fs.readFileSync('./cookie.json')
+        return true
+    } catch (err) {
+        return false
+    }
+}
+
+ipcRenderer.on('Authenticated', async () => {
+    console.log("Authenticated")
+    initSchedule()
+    
+    setTimeout(() => {
+        fetchData()
+    }, 300);
+
+})
+
+function uninstall() {
+    if (confirm('Are you sure that you want to uninstall?')) {
+        ipcRenderer.send('uninstall')
+    }
 }
 
 function initSchedule() {
     console.log('starting fetch shedule')
-    global.job = schedule.scheduleJob('*/5 * * * * *', function(){
+    const cronShedule = JSON.stringify(randomBetween(1 , 59)) + ' * * * * *'
+    console.log(cronShedule)
+    global.job = schedule.scheduleJob(cronShedule, function(){
+        fetchData()
+    })
+    schedule.scheduleJob('*/1 * * * * *', function(){
+        const nextInvoation = job.nextInvocation().getTime()
+        const difference =  Math.round((nextInvoation - new Date().getTime()) / 1000)
+        document.getElementById('refreshBtn').innerText = "Refresh (" + difference + ")"
+    })
+    
+}
+
+function httpCookieGet(path, cb) {
+    buttonsControl(false)
+    const cookie = JSON.parse(fs.readFileSync('./cookie.json'))
+
+    let header = {
+        'Cookie': cookie.name + '=' + cookie.value
+    }
+
+    var options = {
+        hostname: hostname,
+        port: port,
+        path: path,
+        method: 'GET',
+        headers: header,
+    }
+
+    var results = ''
+    var req = https.request(options, function (res) {
+        res.on('data', function (chunk) {
+            results = results + chunk
+        })
+        res.on('end', function () {
+            buttonsControl(true)
+            cb(JSON.parse(results))
+        })
+    })
+
+    req.on('error', function (e) {
+        console.log(e)
+        buttonsControl(true)
+    })
+
+    req.end()
+}
+
+async function fetchData() {
+    buttonsControl(false)
+    document.getElementById("statusText").innerHTML = "Contacting Server";
+    httpCookieGet('/fetch', function(data) {
+        updatePage(data)
+    })
+    
+}
+
+async function search(phrase) {
+    httpCookieGet('/search?search=' + JSON.stringify(phrase), function(data) {
+        fetchData()
+    })
+    
+}
+
+async function skip() {
+    httpCookieGet('/skip', function(data) {
         fetchData()
     })
 }
 
-function fetchData() {
-        const username = document.getElementById("name").value;
-        document.getElementById("statusText").innerHTML = "Contacting Server";
-        const token = "jishyBot";
-
-
-        http.get('http://localhost:9999?token=' + token + "&user=" + username, (resp) => {
-
-            let data = [];
-
-            // A chunk of data has been received.
-            resp.on('data', (chunk) => {
-                data.push(Buffer.from(chunk, "utf-8").toString());
-            });
-
-            // The whole response has been received. Print out the result.
-            resp.on('end', () => {
-                try {
-                    const recievedData = JSON.parse(data[0]);
-                    updatePage(recievedData)
-                } catch (err) {
-                    console.log("Incorect Token");
-                }
-            });
-
-        }).on("error", (err) => {
-            console.log("Error: " + err.message);
-        });
+async function stopTheQueue() {
+    httpCookieGet('/stop', function(data) {
+        fetchData()
+    })
 }
 
+function searchBtnClick() {
+    const searchField = document.getElementById('searchFeild').value
+    if (searchField !== '') {
+        search(searchField)
+        document.getElementById('searchFeild').value = ''
+    } else {
+        console.log("empty")
+    }
+}
+
+document.getElementById('searchFeild').onkeypress = function(e){
+    if (!e) e = window.event;
+    var keyCode = e.code || e.key;
+    if (keyCode == 'Enter'){
+        var searchField = document.getElementById('searchFeild').value
+        searchField = searchField.replaceAll(' ', '+')
+        if (searchField !== '') {
+            search(searchField)
+            document.getElementById('searchFeild').value = ''
+        } else {
+            console.log("empty")
+        }
+        
+        return false;
+    }
+}
+
+String.prototype.replaceAll = function(str1, str2, ignore) 
+{
+    return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
+} 
+
 async function updatePage(recievedData) {
+    buttonsControl(true)
     if (recievedData.active === false) {
-        document.getElementById("statusText").innerHTML = "Inorect username or you are not in a voice channel";
+        document.getElementById("statusText").innerHTML = "You are not in a voice channel or you need to reauthenticate"
         document.getElementById("preAuthBox").style.display = "flex"
         document.getElementById("postAuth").style.display = "none"
     } else {
         document.getElementById("preAuthBox").style.display = "none"
         document.getElementById("postAuth").style.display = "block"
-        console.log(recievedData.queue)
+       
 
         document.getElementById('username').innerText = recievedData.userInfo.username
         document.getElementById('voice').innerText = "Channel: " + recievedData.activeChannel
 
-        generateQueueTable('queueTable', recievedData.queue)
+        //generateQueueTable(testdata)
+        generateQueueTable(recievedData.queue)
         
     }
 }
 
-async function generateQueueTable(id, queue) {
+async function generateQueueTable(queue) {
+
+    const queueGroup = document.getElementById('queueGroup')
+    queueGroup.innerHTML = ""
 
     try {
-        document.getElementById('currentPlaylingImg').innerHTML = ""
-        document.getElementById('currentTitle').innerHTML = ""
-        document.getElementById('currentAuthor').innerHTML = ""
-        document.getElementById('currentDuration').innerHTML = ""
-
-    } catch (err) {}
-
-    const dynamicRows = document.getElementsByClassName("dynamicClass")
-    console.log(dynamicRows)
-    var i;
-    for (i=0;i<dynamicRows.length;i++) {
-        dynamicRows[i].innerHTML = ""
-        dynamicRows[i].remove()    
+        if (queue.currentsong.title) {
+            console.log(queue)
+        }
+    } catch (error) {
+        return
     }
 
-    const playingThumb = document.createElement('img')
-    playingThumb.src = queue.currentsong.thumbnail
-    playingThumb.setAttribute("width", "90%")
-    const playingbox = document.getElementById("currentPlaylingImg")
-    playingbox.appendChild(playingThumb)
-    playingbox.setAttribute("float", "left")
+    // setup current song display
+    const currentsong = document.createElement('div') // <a>
+    currentsong.classList = "list-group-item flex-column align-items-start active"
+    currentsong.href = queue.currentsong.url
+    //currentsong.target = "_blank"
+    queueGroup.appendChild(currentsong)
 
-    document.getElementById("currentTitle").innerHTML = queue.currentsong.title
-    document.getElementById("currentAuthor").innerHTML = queue.currentsong.author
-    document.getElementById("currentDuration").innerHTML = queue.currentsong.duration
+    // set up current song flex box
+    const currentSongflex = document.createElement('div')
+    currentSongflex.classList = "d-flex justify-content-around"
+    currentsong.appendChild(currentSongflex)
 
-    var i
-    for (i=0; i < 1; i++) {
-        const thumb = document.createElement('img')
-        thumb.src = queue.tracks[i].thumbnail
-        thumb.setAttribute('width', '90%')
-        const imgData = document.createElement('td')
-        imgData.appendChild(thumb)
-        const textData = document.createElement('td')
+    // set up current thumbnail
+    const currentThumbFlexItem = document.createElement('div')
+    currentThumbFlexItem.classlist = "p-2"
+    currentThumbFlexItem.setAttribute('width', '50%')
+    const currentThumb = document.createElement('img')
+    currentThumb.src = parseThumbnailUrl(queue.currentsong.thumbnail)
+    currentThumb.setAttribute('width', '70%')
+    currentThumbFlexItem.appendChild(currentThumb)
 
-        const title = document.createElement("h2")
-        const author = document.createElement('h3')
-        const duration = document.createElement('h3')
+    // set up current text
+    const currentTextFlexItem = document.createElement('div')
+    currentTextFlexItem.classlist = "p-2"
+    const currentTitle = document.createElement('h5')
+    const currentAuthor = document.createElement('h6')
+    const currentDuration = document.createElement('h6')
 
-        title.innerHTML = queue.tracks[i].title
-        author.innerHTML = queue.tracks[i].author
-        duration.innerHTML = queue.tracks[i].duration
+    currentTitle.textContent = queue.currentsong.title
+    currentAuthor.textContent = queue.currentsong.author
+    currentDuration.textContent = queue.currentsong.duration
 
-        title.className = "dynamictextstuff"
-        author.className = "dynamictextstuff"
-        duration.className = "dynamictextstuff"
+    currentTitle.setAttribute('font-size', '1.5em')
+    currentAuthor.setAttribute('font-size', '1.5em')
+    currentDuration.setAttribute('font-size', '1.5em')
 
-        textData.appendChild(title)
-        textData.appendChild(author)
-        textData.appendChild(duration)
+    currentTextFlexItem.appendChild(currentTitle)
+    currentTextFlexItem.appendChild(currentAuthor)
+    currentTextFlexItem.appendChild(currentDuration)
 
-        const row = document.createElement('tr')
+    // parent everything 
 
-        row.className = "dynamicClass"
+    currentSongflex.appendChild(currentThumbFlexItem)
+    currentSongflex.appendChild(currentTextFlexItem)
 
-        row.appendChild(imgData)
-        row.appendChild(textData)
+    // pretty much the same code as above but for the rest of the queue
+    if (queue.tracks !== []) {
+        var i
+        for (i=0; i < queue.tracks.length; i++) {
+            // setup current song display
+            const queuedSong = document.createElement('div') // <a>
+            queuedSong.classList = "list-group-item flex-column align-items-start"
+            queuedSong.href = queue.tracks[i].url
+            //queuedSong.target = "_blank"
+            queueGroup.appendChild(queuedSong)
 
-        document.getElementById('queueBody').appendChild(row)
+            // set up current song flex box
+            const queuedSongflex = document.createElement('div')
+            queuedSongflex.classList = "d-flex justify-content-around"
+            queuedSong.appendChild(queuedSongflex)
 
+            // set up current thumbnail
+            const queuedThumbFlexItem = document.createElement('div')
+            queuedThumbFlexItem.classlist = "p-2"
+            queuedThumbFlexItem.setAttribute('width', '50%')
+            const queuedThumb = document.createElement('img')
+            queuedThumb.src = parseThumbnailUrl(queue.tracks[i].thumbnail)
+            queuedThumb.setAttribute('width', '70%')
+            queuedThumbFlexItem.appendChild(queuedThumb)
+
+            // set up current text
+            const queuedTextFlexItem = document.createElement('div')
+            queuedTextFlexItem.classlist = "p-2"
+            const queuedTitle = document.createElement('h5')
+            const QueuedAuthor = document.createElement('h6')
+            const queuedDuration = document.createElement('h6')
+
+            queuedTitle.textContent = queue.tracks[i].title
+            QueuedAuthor.textContent = queue.tracks[i].author
+            queuedDuration.textContent = queue.tracks[i].duration
+
+            queuedTitle.setAttribute('font-size', '1.5em')
+            QueuedAuthor.setAttribute('font-size', '1.5em')
+            queuedDuration.setAttribute('font-size', '1.5em')
+
+            queuedTextFlexItem.appendChild(queuedTitle)
+            queuedTextFlexItem.appendChild(QueuedAuthor)
+            queuedTextFlexItem.appendChild(queuedDuration)
+
+            // parent everything 
+
+            queuedSongflex.appendChild(queuedThumbFlexItem)
+            queuedSongflex.appendChild(queuedTextFlexItem)
+
+        }
     }
-
 }
-const testdata = {
+
+function parseThumbnailUrl(input) {
+    try {
+        const startchar = input.indexOf('/vi/') + 4
+        const endchar = input.indexOf('/hqdefault.jpg')
+        const otherendchar = input.indexOf('/maxresdefault.jpg')
+
+        if ( endchar === -1 ) {
+            const identifier = input.substring(startchar, otherendchar)
+    
+            return 'https://i.ytimg.com/vi/' + identifier + '/0.jpg'
+        } else {
+            const identifier = input.substring(startchar, endchar)
+    
+            return 'https://i.ytimg.com/vi/' + identifier + '/0.jpg'
+        }
+    } catch (err) {}
+    
+}
+
+global.testdata = {
     currentsong: {
         author: "AJR",
         duration: "4:35",
@@ -181,21 +365,53 @@ const testdata = {
             url: "https://www.youtube.com/watch?v=uD4izuDMUQA",
             views: 79434044,
         },
-        {
-            author: "melodysheep",
-            duration: "29:21",
-            durationMS: 1761000,
-            id: "948318205934436434",
-            playlist: null,
-            thumbnail: "https://i3.ytimg.com/vi/uD4izuDMUQA/maxresdefault.jpg",
-            title: "Other test video ",
-            url: "https://www.youtube.com/watch?v=uD4izuDMUQA",
-            views: 79434044,
-        }
+        
     ]
 
     
 
 }
 
-initSchedule()
+function buttonsControl(input) {
+    const enable = !input
+
+    const buttons = document.querySelectorAll('button')
+    for (button of buttons) {
+        button.disabled = enable
+        if (enable) {
+            button.style.color = "gray"
+        } else {
+            button.style.color = "#fff"
+        }
+        
+
+    }
+
+}
+
+function logout() {
+    if (confirm("Are you sure that you want to logout?")) {
+        ipcRenderer.send('logout')
+    }
+}
+
+function KeyPress(e) {
+    //console.log(e)
+    if (e.code == 'F1') {
+        ipcRenderer.send('debugWin')
+    }
+}
+
+document.onkeydown = KeyPress;
+
+function randomBetween(min, max) {  
+    return Math.floor(
+      Math.random() * (max - min) + min
+    )
+}
+
+initTitlebar()
+if (isAuthenticated()) {
+    initSchedule()
+    fetchData()
+}
