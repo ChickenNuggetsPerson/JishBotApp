@@ -1,6 +1,6 @@
 document.getElementById("postAuth").style.display = "none"
 
-const version = "Version: 0.3.5"
+const version = "Version: 0.3.6"
 
 console.log(version)
 document.getElementById('version').innerText = version
