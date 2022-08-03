@@ -1,6 +1,6 @@
 {
   "name": "JishBotApp",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "An app to use the Jish Discord Bot",
   "main": "./index.js",
   "author": "Hayden Steele",

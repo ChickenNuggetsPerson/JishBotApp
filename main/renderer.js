@@ -1,6 +1,6 @@
 document.getElementById("postAuth").style.display = "none"
 
-const version = "Version: 0.3.6"
+const version = "Version: 0.3.7"
 
 console.log(version)
 document.getElementById('version').innerText = version
@@ -17,7 +17,6 @@ let $ = jQuery = require('jquery')
 const fs = require('fs')
 
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0
-
 
 const clientID = randomBetween(0, 999999999999)
 console.log("Client: " + clientID)
@@ -173,7 +172,6 @@ var modal = document.getElementById("myModal");
 var span = document.getElementsByClassName("close")[0];
 
 async function settingsBtnClick() {
-    //ipcRenderer.send('settingsMenu')
     modal.style.display = "block";
 }
 
@@ -225,7 +223,6 @@ async function updatePage(recievedData) {
         document.getElementById('username').innerText = recievedData.userInfo.username
         document.getElementById('voice').innerText = "Channel: " + recievedData.activeChannel
 
-        //generateQueueTable(testdata)
         generateQueueTable(recievedData.queue)
         
     }
@@ -245,10 +242,9 @@ async function generateQueueTable(queue) {
     }
 
     // setup current song display
-    const currentsong = document.createElement('div') // <a>
+    const currentsong = document.createElement('div') 
     currentsong.classList = "list-group-item flex-column align-items-start active"
     currentsong.href = queue.currentsong.url
-    //currentsong.target = "_blank"
     queueGroup.appendChild(currentsong)
 
     // set up current song flex box
@@ -297,7 +293,6 @@ async function generateQueueTable(queue) {
             const queuedSong = document.createElement('div') // <a>
             queuedSong.classList = "list-group-item flex-column align-items-start"
             queuedSong.href = queue.tracks[i].url
-            //queuedSong.target = "_blank"
             queueGroup.appendChild(queuedSong)
 
             // set up current song flex box
@@ -357,39 +352,8 @@ function parseThumbnailUrl(input) {
     
             return 'https://i.ytimg.com/vi/' + identifier + '/0.jpg'
         }
-    } catch (err) {}
+    } catch (err) { console.log(err) }
     
-}
-
-global.testdata = {
-    currentsong: {
-        author: "AJR",
-        duration: "4:35",
-        durationMS: 275000,
-        id: "948318187856986174",
-        playlist: null,
-        thumbnail: "https://i3.ytimg.com/vi/CkbVu39hTT0/maxresdefault.jpg",
-        title: "AJR - Ordinaryish People feat. Blue Man Group (Official Video)",
-        url: "https://www.youtube.com/watch?v=CkbVu39hTT0",
-        views: 490907,
-    },
-    tracks: [
-        {
-            author: "melodysheep",
-            duration: "29:21",
-            durationMS: 1761000,
-            id: "948318205934436434",
-            playlist: null,
-            thumbnail: "https://i3.ytimg.com/vi/uD4izuDMUQA/maxresdefault.jpg",
-            title: "TIMELAPSE OF THE FUTURE: A Journey to the End of Time (4K)",
-            url: "https://www.youtube.com/watch?v=uD4izuDMUQA",
-            views: 79434044,
-        },
-        
-    ]
-
-    
-
 }
 
 function buttonsControl(input) {
@@ -413,6 +377,17 @@ function logout() {
     if (confirm("Are you sure that you want to logout?")) {
         ipcRenderer.send('logout')
     }
+}
+
+function loadSettingsMenu() {
+    const settingsList = document.getElementById("settingsList")
+
+    // todo
+    // 1. copy the song list code and put that in for the settings
+    // 2. make a save settings button
+    // 3. make settings defaults and init systems
+    // 4. transition from config.json to settings.json in code
+
 }
 
 function KeyPress(e) {
