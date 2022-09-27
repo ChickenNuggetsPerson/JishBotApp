@@ -103,7 +103,7 @@ function httpCookieGet(path, cb) {
         'Cookie': cookie.name + '=' + cookie.value
     }
 
-    var options = {
+    let options = {
         hostname: hostname,
         port: port,
         path: path,
@@ -111,8 +111,8 @@ function httpCookieGet(path, cb) {
         headers: header,
     }
 
-    var results = ''
-    var req = https.request(options, function (res) {
+    let results = ''
+    let req = https.request(options, function (res) {
         res.on('data', function (chunk) {
             results = results + chunk
         })
